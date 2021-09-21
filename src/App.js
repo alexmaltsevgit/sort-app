@@ -3,6 +3,7 @@ import Sections from "components/Sections";
 import Header from "components/Header";
 import Footer from "components/Footer";
 import tw from "tailwind-styled-components";
+import { findObjectIndexByProperty } from "utils/util";
 
 const Root = tw.div`
   flex
@@ -28,8 +29,22 @@ function App() {
     setShouldReload(true);
   };
 
-  const onReload = (chartsData) => {
-    setChartsData(chartsData);
+  const onReload = (chartData) => {
+    const chartIndex = findObjectIndexByProperty(
+      chartsData,
+      "name",
+      chartData.name
+    );
+
+    setChartsData((prevCharts) => {
+      const newCharts = prevCharts;
+
+      chartIndex === -1
+        ? newCharts.push(chartData)
+        : (newCharts[chartIndex] = chartData);
+
+      return newCharts;
+    });
   };
 
   useEffect(() => {

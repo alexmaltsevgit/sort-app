@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import tw from "tailwind-styled-components";
+import { findObjectIndexByProperty } from "utils/util";
 import Bars from "./Bars";
 
 const Container = styled.div`
@@ -57,23 +58,19 @@ export default function SingleSection({
     output: [],
   });
 
-  const buildChartsData = (sorts) => {
-    const chartsData = [];
+  const updateChart = (sortData) => {
     try {
-      sorts.forEach((sortData) => {
-        const {
-          name,
-          modes: {
-            analytics: {
-              counters: { permutations, comparisons },
-            },
+      const {
+        modes: {
+          analytics: {
+            counters: { permutations, comparisons },
           },
-        } = sortData;
+        },
+      } = sortData;
 
-        chartsData.push({ name, permutations, comparisons });
-      });
-    } finally {
-      return chartsData;
+      return { name: sectionName, permutations, comparisons };
+    } catch (e) {
+      return {};
     }
   };
 
@@ -162,20 +159,17 @@ export default function SingleSection({
         },
       ];
 
-      handleReload(buildChartsData(data));
+      const sortIndex = findObjectIndexByProperty(data, "name", sectionName);
+      const sortData = data[sortIndex];
 
-      for (let i = 0; i < data.length; i++) {
-        if (data[i].name.toLowerCase() === sectionName.toLowerCase()) {
-          const {
-            modes: { analytics, test },
-          } = data[i];
+      handleReload(updateChart(sortData));
 
-          setTestValues(test);
-          setAnalyticsValues(analytics);
+      const {
+        modes: { analytics, test },
+      } = sortData;
 
-          break;
-        }
-      }
+      setTestValues(test);
+      setAnalyticsValues(analytics);
     };
 
     const changeMode = () => {
